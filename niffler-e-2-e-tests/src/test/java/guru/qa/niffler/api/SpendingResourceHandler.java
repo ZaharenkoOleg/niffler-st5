@@ -6,7 +6,7 @@ import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.POST;
 
-public interface SpendApi {
+public interface SpendingResourceHandler {
     @POST("internal/spends/add")
     Call<SpendJson> createSpend(@Body SpendJson spendJson);
 
