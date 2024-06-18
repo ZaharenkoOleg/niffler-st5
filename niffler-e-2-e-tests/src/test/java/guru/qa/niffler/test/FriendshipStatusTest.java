@@ -41,16 +41,6 @@ public class FriendshipStatusTest {
     }
 
     @Test
-    public void userWithSentInvite3(@User(value = INVITE_SENT) UserJson userForTest,
-                                    @User(value = INVITE_RECEIVED) UserJson anotherUserForTest) {
-        MainPage mainPage = open("http://127.0.0.1:3000/", WelcomePage.class)
-                .clickLogInButton()
-                .doLogin(userForTest.username(), userForTest.testData().password());
-        AllPeoplePage allPeoplePage = mainPage.openPeoplePage();
-        allPeoplePage.isInviteSent(anotherUserForTest.username());
-    }
-
-    @Test
     public void userWithReceivedInvite1(@User(value = INVITE_RECEIVED) UserJson userForTest,
                                         @User(value = INVITE_SENT) UserJson anotherUserForTest) {
         MainPage mainPage = open("http://127.0.0.1:3000/", WelcomePage.class)
@@ -71,18 +61,8 @@ public class FriendshipStatusTest {
     }
 
     @Test
-    public void userWithReceivedInvite3(@User(value = INVITE_RECEIVED) UserJson userForTest,
-                                        @User(value = INVITE_SENT) UserJson anotherUserForTest) {
-        MainPage mainPage = open("http://127.0.0.1:3000/", WelcomePage.class)
-                .clickLogInButton()
-                .doLogin(userForTest.username(), userForTest.testData().password());
-        AllPeoplePage allPeoplePage = mainPage.openPeoplePage();
-        allPeoplePage.isInvitationReceived(anotherUserForTest.username());
-    }
-
-    @Test
-    void userWithFriend1(@User(value = WITH_FRIEND) UserJson userForTest,
-                         @User(value = WITH_FRIEND) UserJson anotherUserForTest) {
+    void userWithFriend(@User(value = WITH_FRIEND) UserJson userForTest,
+                        @User(value = WITH_FRIEND) UserJson anotherUserForTest) {
         MainPage mainPage = open("http://127.0.0.1:3000/", WelcomePage.class)
                 .clickLogInButton()
                 .doLogin(userForTest.username(), userForTest.testData().password());

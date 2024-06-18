@@ -86,9 +86,9 @@ public class UserQueueExtension implements
     public void afterEach(ExtensionContext context) throws Exception {
         Map<User.UserType, List<UserJson>> usersAfterTest = context.getStore(NAMESPACE).get(context.getUniqueId(), Map.class);
         if (usersAfterTest != null) {
-            for (Map.Entry<User.UserType, List<UserJson>> user : usersAfterTest.entrySet()) {
-                USERS.get(user.getKey()).addAll(user.getValue());
-            }
+            usersAfterTest.forEach((userType, userJsonList) ->
+                    USERS.get(userType).addAll(userJsonList)
+            );
         }
     }
 
@@ -99,15 +99,6 @@ public class UserQueueExtension implements
                 .getType()
                 .isAssignableFrom(UserJson.class) && parameterContext.getParameter().isAnnotationPresent(User.class);
     }
-
-//    @Override
-//    public UserJson resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
-//        Optional<User> annotation = AnnotationSupport.findAnnotation(parameterContext.getParameter(), User.class);
-//        User.UserType userType = annotation.get().value();
-//        Map<User.UserType, List<UserJson>> users = extensionContext.getStore(NAMESPACE).
-//                get(extensionContext.getUniqueId(), Map.class);
-//        return users.get(userType).remove(0);
-//    }
 
     @Override
     public UserJson resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
