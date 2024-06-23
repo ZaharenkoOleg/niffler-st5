@@ -10,7 +10,6 @@ public class JdbcSpendExtension extends AbstractSpendExtension {
 
     private final SpendRepository spendRepository = new SpendRepositoryJdbc();
 
-
     @Override
     protected SpendJson createSpend(SpendJson spendJson, CategoryJson categoryJson) {
         SpendEntity spendEntity = SpendEntity.fromJson(spendJson, categoryJson);
