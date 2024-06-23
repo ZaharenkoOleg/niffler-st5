@@ -37,8 +37,8 @@ public class SpendingHttpTest {
         // createSpend
         Selenide.open("http://127.0.0.1:3000/");
         $("a[href*='redirect']").click();
-        $("input[name='username']").setValue("dima");
-        $("input[name='password']").setValue("12345");
+        $("input[name='username']").setValue("zakharenkoo");
+        $("input[name='password']").setValue("ZaharenkoOP");
         $("button[type='submit']").click();
     }
 
@@ -61,8 +61,8 @@ public class SpendingHttpTest {
     }
 
     @Category(
-            category = "Обучение32",
-            username = "dima"
+            category = "Обучение232",
+            username = "ZaharenkoOP"
     )
     @Spend(
             description = "QA.GURU Advanced 5",

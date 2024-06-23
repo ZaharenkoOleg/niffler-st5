@@ -62,7 +62,7 @@ public class SpendingJdbcTest {
     }
 
     @Category(
-            category = "Обучение32",
+            category = "Обучение332",
             username = "dima"
     )
     @Spend(
