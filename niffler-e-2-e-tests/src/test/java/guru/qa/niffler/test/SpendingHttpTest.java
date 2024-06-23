@@ -25,8 +25,6 @@ import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.$;
 
-
-@WebTest
 @ExtendWith({HttpCategoryExtension.class, HttpSpendExtension.class})
 public class SpendingHttpTest {
 
@@ -63,7 +61,7 @@ public class SpendingHttpTest {
     }
 
     @Category(
-            category = "Обучение5",
+            category = "Обучение32",
             username = "dima"
     )
     @Spend(

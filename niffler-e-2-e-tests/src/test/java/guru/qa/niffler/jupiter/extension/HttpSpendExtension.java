@@ -1,6 +1,7 @@
 package guru.qa.niffler.jupiter.extension;
 
 import guru.qa.niffler.api.SpendApi;
+import guru.qa.niffler.model.CategoryJson;
 import guru.qa.niffler.model.SpendJson;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -24,7 +25,7 @@ public class HttpSpendExtension extends AbstractSpendExtension {
             .build();
 
     @Override
-    protected SpendJson createSpend(SpendJson spend) {
+    protected SpendJson createSpend(SpendJson spend, CategoryJson categoryJson) {
         SpendApi spendApi = retrofit.create(SpendApi.class);
         try {
             return spendApi.createSpend(spend).execute().body();
@@ -34,6 +35,6 @@ public class HttpSpendExtension extends AbstractSpendExtension {
     }
 
     @Override
-    protected void removeSpend(SpendJson spend) {
+    protected void removeSpend(SpendJson entity) {
     }
 }

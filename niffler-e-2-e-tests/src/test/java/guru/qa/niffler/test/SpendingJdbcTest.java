@@ -26,12 +26,21 @@ import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.$;
 
 
-@WebTest
 @ExtendWith({JdbcCategoryExtension.class, JdbcSpendExtension.class})
 public class SpendingJdbcTest {
 
     static {
         Configuration.browserSize = "1920x1080";
+    }
+
+    @BeforeEach
+    void doLogin() {
+        // createSpend
+        Selenide.open("http://127.0.0.1:3000/");
+        $("a[href*='redirect']").click();
+        $("input[name='username']").setValue("dima");
+        $("input[name='password']").setValue("12345");
+        $("button[type='submit']").click();
     }
 
     @Test
@@ -53,7 +62,7 @@ public class SpendingJdbcTest {
     }
 
     @Category(
-            category = "Обучение6",
+            category = "Обучение32",
             username = "dima"
     )
     @Spend(
@@ -63,11 +72,6 @@ public class SpendingJdbcTest {
     )
     @Test
     void spendingShouldBeDeletedAfterTableAction(SpendJson spendJson) {
-        Selenide.open("http://127.0.0.1:3000/");
-        $("a[href*='redirect']").click();
-        $("input[name='username']").setValue("dima");
-        $("input[name='password']").setValue("12345");
-        $("button[type='submit']").click();
         SelenideElement rowWithSpending = $(".spendings-table tbody")
                 .$$("tr")
                 .find(text(spendJson.description()))

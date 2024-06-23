@@ -76,8 +76,8 @@ public class SpendRepositoryJdbc implements SpendRepository {
                      PreparedStatement.RETURN_GENERATED_KEYS
              )) {
             ps.setString(1, spend.getUsername());
-            ps.setDate(2, new Date(System.currentTimeMillis()));
-            ps.setString(3, String.valueOf(spend.getCurrency()));
+            ps.setDate(2, new Date(spend.getSpendDate().getTime()));
+            ps.setString(3, spend.getCurrency().name());
             ps.setDouble(4, spend.getAmount());
             ps.setString(5, spend.getDescription());
             ps.setObject(6, spend.getCategory().getId());

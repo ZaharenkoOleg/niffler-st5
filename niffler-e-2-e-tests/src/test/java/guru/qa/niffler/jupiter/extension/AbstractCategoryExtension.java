@@ -39,7 +39,7 @@ public abstract class AbstractCategoryExtension implements
 
     protected abstract CategoryJson createCategory(CategoryJson spend);
 
-    protected abstract void removeCategory(CategoryJson spend);
+    protected abstract void removeCategory(CategoryJson categoryJson);
 
     @Override
     public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {

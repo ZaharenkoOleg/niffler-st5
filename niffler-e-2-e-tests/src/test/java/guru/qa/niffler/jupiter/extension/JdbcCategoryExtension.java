@@ -9,15 +9,15 @@ public class JdbcCategoryExtension extends AbstractCategoryExtension {
     private final SpendRepository spendRepository = new SpendRepositoryJdbc();
 
     @Override
-    protected CategoryJson createCategory(CategoryJson category) {
-        CategoryEntity categoryEntity = CategoryEntity.fromJson(category);
+    protected CategoryJson createCategory(CategoryJson categoryJson) {
+        CategoryEntity categoryEntity = CategoryEntity.fromJson(categoryJson);
         categoryEntity = spendRepository.createCategory(categoryEntity);
         return CategoryJson.fromEntity(categoryEntity);
     }
 
     @Override
-    protected void removeCategory(CategoryJson category) {
-        CategoryEntity categoryEntity = CategoryEntity.fromJson(category);
+    protected void removeCategory(CategoryJson categoryJson) {
+        CategoryEntity categoryEntity = CategoryEntity.fromJson(categoryJson);
         spendRepository.removeCategory(categoryEntity);
     }
 }

@@ -18,7 +18,7 @@ public abstract class AbstractSpendExtension implements
 
     @Override
     public void beforeEach(ExtensionContext extensionContext) throws Exception {
-        CategoryJson category = extensionContext.getStore(AbstractSpendExtension.NAMESPACE).get(
+        CategoryJson category = extensionContext.getStore(AbstractCategoryExtension.NAMESPACE).get(
                 extensionContext.getUniqueId(),
                 CategoryJson.class
         );
@@ -38,26 +38,26 @@ public abstract class AbstractSpendExtension implements
                     );
                     extensionContext
                             .getStore(NAMESPACE)
-                            .put(extensionContext.getUniqueId(), createSpend(spendJson));
+                            .put(extensionContext.getUniqueId(), createSpend(spendJson, category));
                 }
         );
     }
 
+    @Override
     public void afterEach(ExtensionContext context) {
         SpendJson spendJson = context.getStore(NAMESPACE).get(context.getUniqueId(), SpendJson.class);
         removeSpend(spendJson);
     }
 
-    protected abstract SpendJson createSpend(SpendJson spend);
-
-    protected abstract void removeSpend(SpendJson spend);
+    protected abstract SpendJson createSpend(SpendJson spend, CategoryJson category);
+    protected abstract void removeSpend(SpendJson spendJson);
 
     @Override
     public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
         return parameterContext
                 .getParameter()
                 .getType()
-                .isAssignableFrom(CategoryJson.class);
+                .isAssignableFrom(SpendJson.class);
     }
 
     @Override

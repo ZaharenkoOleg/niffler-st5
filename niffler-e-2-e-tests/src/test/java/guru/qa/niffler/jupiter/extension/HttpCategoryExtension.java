@@ -24,16 +24,16 @@ public class HttpCategoryExtension extends AbstractCategoryExtension {
             .build();
 
     @Override
-    protected CategoryJson createCategory(CategoryJson spend) {
+    protected CategoryJson createCategory(CategoryJson categoryJson) {
         SpendApi spendApi = retrofit.create(SpendApi.class);
         try {
-            return spendApi.createCategory(spend).execute().body();
+            return spendApi.createCategory(categoryJson).execute().body();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
-    protected void removeCategory(CategoryJson spend) {
+    protected void removeCategory(CategoryJson categoryJson) {
     }
 }
