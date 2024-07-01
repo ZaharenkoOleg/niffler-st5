@@ -1,10 +1,9 @@
 package guru.qa.niffler.data.repository;
 
 import guru.qa.niffler.data.DataBase;
-import guru.qa.niffler.data.entity.Authority;
-import guru.qa.niffler.data.entity.UserAuthEntity;
-import guru.qa.niffler.data.entity.UserEntity;
+import guru.qa.niffler.data.entity.*;
 import guru.qa.niffler.data.jdbc.DataSourceProvider;
+import guru.qa.niffler.data.sjdbc.UserEntityRowMapper;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -15,6 +14,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Optional;
 import java.util.UUID;
+
+import static java.sql.Statement.RETURN_GENERATED_KEYS;
 
 public class UserRepositoryJdbc implements UserRepository {
 
@@ -31,7 +32,7 @@ public class UserRepositoryJdbc implements UserRepository {
                     "INSERT INTO \"user\" (" +
                             "username, password, enabled, account_non_expired, account_non_locked, credentials_non_expired)" +
                             " VALUES (?, ?, ?, ?, ?, ?)",
-                    PreparedStatement.RETURN_GENERATED_KEYS
+                    RETURN_GENERATED_KEYS
             );
                  PreparedStatement authorityPs = conn.prepareStatement(
                          "INSERT INTO \"authority\" (" +
@@ -83,7 +84,7 @@ public class UserRepositoryJdbc implements UserRepository {
                      "INSERT INTO \"user\" (" +
                              "username, currency, firstname, surname, photo, photo_small)" +
                              " VALUES (?, ?, ?, ?, ?, ?)",
-                     PreparedStatement.RETURN_GENERATED_KEYS
+                     RETURN_GENERATED_KEYS
              )) {
             userPs.setString(1, user.getUsername());
             userPs.setString(2, user.getCurrency().name());
@@ -109,7 +110,110 @@ public class UserRepositoryJdbc implements UserRepository {
     }
 
     @Override
+    public UserAuthEntity updateUserInAuth(UserAuthEntity user) {
+        try (Connection connection = authDataSource.getConnection()) {
+            connection.setAutoCommit(false);
+
+            try (PreparedStatement ps = connection.prepareStatement(
+                    """
+                            UPDATE "user"
+                            SET username = ?,
+                            password = ?,
+                            enabled = ?,
+                            account_non_expired = ?,
+                            account_non_locked = ?,
+                            credentials_non_expired= ?
+                            WHERE id = ?""",
+                    RETURN_GENERATED_KEYS);
+
+                 PreparedStatement deleteAuthorityPs = connection.prepareStatement(
+                         "DELETE FROM \"authority\" WHERE user_id = ?"
+                 );
+
+                 PreparedStatement authorityPs = connection.prepareStatement(
+                         "INSERT INTO \"authority\" (user_id, authority) VALUES (?, ?)"
+                 )) {
+                ps.setString(1, user.getUsername());
+                ps.setString(2, pe.encode(user.getPassword()));
+                ps.setBoolean(3, user.getEnabled());
+                ps.setBoolean(4, user.getAccountNonExpired());
+                ps.setBoolean(5, user.getAccountNonLocked());
+                ps.setBoolean(6, user.getCredentialsNonExpired());
+                ps.setObject(7, user.getId());
+                ps.executeUpdate();
+
+                deleteAuthorityPs.setObject(1, user.getId());
+                deleteAuthorityPs.executeUpdate();
+
+                for (AuthorityEntity a : user.getAuthorities()) {
+                    authorityPs.setObject(1, user.getId());
+                    authorityPs.setString(2, a.getAuthority().name());
+                    authorityPs.addBatch();
+                }
+                authorityPs.executeBatch();
+
+                connection.commit();
+                return user;
+
+            } catch (SQLException e) {
+                connection.rollback();
+                throw e;
+            } finally {
+                connection.setAutoCommit(true);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public UserEntity updateUserInUserdata(UserEntity user) {
+        try (Connection connection = udDataSource.getConnection();
+             PreparedStatement ps = connection.prepareStatement(
+                     """
+                             UPDATE "user"
+                             SET username = ?,
+                             "currency = ?,
+                             "firstname = ?,
+                             "surname = ?,
+                             "photo = ?,
+                             "photo_small = ?
+                             "WHERE id = ?""")) {
+
+            ps.setString(1, user.getUsername());
+            ps.setString(2, user.getCurrency().name());
+            ps.setString(3, user.getFirstname());
+            ps.setObject(4, user.getSurname());
+            ps.setObject(5, user.getPhoto());
+            ps.setObject(6, user.getPhotoSmall());
+            ps.setObject(7, user.getId());
+            ps.executeUpdate();
+
+            return user;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
     public Optional<UserEntity> findUserInUserdataById(UUID id) {
-        return Optional.empty();
+        try (Connection connection = udDataSource.getConnection();
+             PreparedStatement ps = connection.prepareStatement(
+                     "SELECT * FROM \"user\" WHERE id = ?"
+             )) {
+
+            ps.setObject(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    UserEntityRowMapper rowMapper = UserEntityRowMapper.instance;
+                    UserEntity userEntity = rowMapper.mapRow(rs, 1);
+                    return Optional.of(userEntity);
+                } else {
+                    return Optional.empty();
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

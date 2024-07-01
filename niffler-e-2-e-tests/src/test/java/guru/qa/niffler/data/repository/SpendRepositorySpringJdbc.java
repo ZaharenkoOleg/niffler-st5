@@ -4,12 +4,14 @@ import guru.qa.niffler.data.DataBase;
 import guru.qa.niffler.data.entity.CategoryEntity;
 import guru.qa.niffler.data.entity.SpendEntity;
 import guru.qa.niffler.data.jdbc.DataSourceProvider;
+import guru.qa.niffler.data.sjdbc.SpendEntityRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
+import java.util.List;
 import java.util.UUID;
 
 public class SpendRepositorySpringJdbc implements SpendRepository {
@@ -98,5 +100,11 @@ public class SpendRepositorySpringJdbc implements SpendRepository {
                 "DELETE FROM spend WHERE id = ?",
                 spend.getId()
         );
+    }
+
+    @Override
+    public List<SpendEntity> findAllByUsername(String username) {
+        return jdbcTemplate.query("SELECT * FROM \"spend\" WHERE username = ?",
+                SpendEntityRowMapper.instance, username);
     }
 }

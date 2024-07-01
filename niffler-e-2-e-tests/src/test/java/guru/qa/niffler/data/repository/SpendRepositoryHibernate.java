@@ -3,9 +3,16 @@ package guru.qa.niffler.data.repository;
 import guru.qa.niffler.data.entity.CategoryEntity;
 import guru.qa.niffler.data.entity.SpendEntity;
 
+import java.util.List;
+
 public class SpendRepositoryHibernate implements SpendRepository {
     @Override
     public CategoryEntity createCategory(CategoryEntity category) {
+        return null;
+    }
+
+    @Override
+    public List<SpendEntity> findAllByUsername(String username) {
         return null;
     }
 

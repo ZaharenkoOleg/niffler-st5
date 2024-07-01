@@ -12,6 +12,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.JdbcTransactionManager;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.lang.NonNull;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -20,6 +21,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Optional;
 import java.util.UUID;
+
+import static java.sql.Statement.RETURN_GENERATED_KEYS;
 
 public class UserRepositorySpringJdbc implements UserRepository {
 
@@ -48,7 +51,7 @@ public class UserRepositorySpringJdbc implements UserRepository {
                                 "INSERT INTO \"user\" (" +
                                         "username, password, enabled, account_non_expired, account_non_locked, credentials_non_expired)" +
                                         " VALUES (?, ?, ?, ?, ?, ?)",
-                                PreparedStatement.RETURN_GENERATED_KEYS
+                                RETURN_GENERATED_KEYS
                         );
                         ps.setString(1, user.getUsername());
                         ps.setString(2, pe.encode(user.getPassword()));
@@ -88,7 +91,7 @@ public class UserRepositorySpringJdbc implements UserRepository {
                             "INSERT INTO \"user\" (" +
                                     "username, currency, firstname, surname, photo, photo_small)" +
                                     " VALUES (?, ?, ?, ?, ?, ?)",
-                            PreparedStatement.RETURN_GENERATED_KEYS
+                            RETURN_GENERATED_KEYS
                     );
                     ps.setString(1, user.getUsername());
                     ps.setString(2, user.getCurrency().name());
@@ -114,5 +117,57 @@ public class UserRepositorySpringJdbc implements UserRepository {
         } catch (DataRetrievalFailureException e) {
             return Optional.empty();
         }
+    }
+
+    @Override
+    public UserAuthEntity updateUserInAuth(UserAuthEntity user) {
+        return authTxTemplate.execute(status -> {
+            authJdbcTemplate.update(con -> {
+                PreparedStatement ps = con.prepareStatement(
+                        "UPDATE \"user\" SET username=?, password=?, enabled=?, account_non_expired=?, " +
+                                "account_non_locked=?, credentials_non_expired=? WHERE id=?"
+                );
+                ps.setString(1, user.getUsername());
+                ps.setString(2, pe.encode(user.getPassword()));
+                ps.setBoolean(3, user.getEnabled());
+                ps.setBoolean(4, user.getAccountNonExpired());
+                ps.setBoolean(5, user.getAccountNonLocked());
+                ps.setBoolean(6, user.getCredentialsNonExpired());
+                ps.setObject(7, user.getId());
+                return ps;
+            });
+            authJdbcTemplate.update("DELETE FROM \"authority\" WHERE user_id = ?", user.getId());
+            authJdbcTemplate.batchUpdate(
+                    "INSERT INTO \"authority\" (user_id, authority) VALUES (?, ?)",
+                    new BatchPreparedStatementSetter() {
+                        @Override
+                        public void setValues(@NonNull PreparedStatement ps, int i) throws SQLException {
+                            ps.setObject(1, user.getId());
+                            ps.setString(2, user.getAuthorities().get(i).getAuthority().name());
+                        }
+
+                        @Override
+                        public int getBatchSize() {
+                            return user.getAuthorities().size();
+                        }
+                    }
+            );
+            return user;
+        });
+    }
+
+    @Override
+    public UserEntity updateUserInUserdata(UserEntity user) {
+        userdataJdbcTemplate.update("UPDATE \"user\" SET username=?, currency=?, firstname=?, " +
+                        "surname=?, photo=?, photo_small=? WHERE id=?",
+                user.getUsername(),
+                user.getCurrency().name(),
+                user.getFirstname(),
+                user.getSurname(),
+                user.getPhoto(),
+                user.getPhotoSmall(),
+                user.getId()
+        );
+        return user;
     }
 }

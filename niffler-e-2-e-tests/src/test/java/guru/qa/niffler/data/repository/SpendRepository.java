@@ -3,6 +3,8 @@ package guru.qa.niffler.data.repository;
 import guru.qa.niffler.data.entity.CategoryEntity;
 import guru.qa.niffler.data.entity.SpendEntity;
 
+import java.util.List;
+
 public interface SpendRepository {
 
     static SpendRepository getInstance() {
@@ -16,6 +18,7 @@ public interface SpendRepository {
     }
 
     CategoryEntity createCategory(CategoryEntity category);
+    List<SpendEntity> findAllByUsername(String username);
 
     CategoryEntity editCategory(CategoryEntity category);
 
